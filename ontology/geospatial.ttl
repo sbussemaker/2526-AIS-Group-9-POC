@@ -1,0 +1,196 @@
+@prefix geo: <http://example.org/geospatial#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Geospatial Ontology for Dutch Government Data Integration
+# Shared vocabulary for Kadaster, CBS, and Rijkswaterstaat
+
+# Classes
+
+geo:Location a rdfs:Class ;
+    rdfs:label "Location"@en, "Locatie"@nl ;
+    rdfs:comment "A geographic location in the Netherlands" .
+
+geo:Property a rdfs:Class ;
+    rdfs:label "Property"@en, "Perceel"@nl ;
+    rdfs:comment "A cadastral property with legal boundaries" .
+
+geo:Municipality a rdfs:Class ;
+    rdfs:label "Municipality"@en, "Gemeente"@nl ;
+    rdfs:comment "A Dutch municipality" .
+
+geo:Province a rdfs:Class ;
+    rdfs:label "Province"@en, "Provincie"@nl ;
+    rdfs:comment "A Dutch province" .
+
+geo:Building a rdfs:Class ;
+    rdfs:label "Building"@en, "Gebouw"@nl ;
+    rdfs:comment "A building structure" .
+
+geo:WaterBody a rdfs:Class ;
+    rdfs:label "Water Body"@en, "Waterlichaam"@nl ;
+    rdfs:comment "A body of water (river, canal, lake)" .
+
+geo:Road a rdfs:Class ;
+    rdfs:label "Road"@en, "Weg"@nl ;
+    rdfs:comment "A road or highway" .
+
+geo:Infrastructure a rdfs:Class ;
+    rdfs:label "Infrastructure"@en, "Infrastructuur"@nl ;
+    rdfs:comment "Infrastructure element (bridge, dam, etc.)" .
+
+# Properties - Identification
+
+geo:locationId a rdf:Property ;
+    rdfs:label "Location ID"@en, "Locatie ID"@nl ;
+    rdfs:domain geo:Location ;
+    rdfs:range xsd:string .
+
+geo:cadastralId a rdf:Property ;
+    rdfs:label "Cadastral ID"@en, "Kadaster Nummer"@nl ;
+    rdfs:domain geo:Property ;
+    rdfs:range xsd:string .
+
+geo:bagId a rdf:Property ;
+    rdfs:label "BAG ID"@en ;
+    rdfs:comment "Basisregistratie Adressen en Gebouwen ID" ;
+    rdfs:domain geo:Building ;
+    rdfs:range xsd:string .
+
+# Properties - Geographic
+
+geo:address a rdf:Property ;
+    rdfs:label "Address"@en, "Adres"@nl ;
+    rdfs:range xsd:string .
+
+geo:postalCode a rdf:Property ;
+    rdfs:label "Postal Code"@en, "Postcode"@nl ;
+    rdfs:range xsd:string .
+
+geo:municipality a rdf:Property ;
+    rdfs:label "Municipality"@en, "Gemeente"@nl ;
+    rdfs:range xsd:string .
+
+geo:province a rdf:Property ;
+    rdfs:label "Province"@en, "Provincie"@nl ;
+    rdfs:range xsd:string .
+
+geo:latitude a rdf:Property ;
+    rdfs:label "Latitude"@en, "Breedtegraad"@nl ;
+    rdfs:range xsd:decimal .
+
+geo:longitude a rdf:Property ;
+    rdfs:label "Longitude"@en, "Lengtegraad"@nl ;
+    rdfs:range xsd:decimal .
+
+geo:coordinates a rdf:Property ;
+    rdfs:label "Coordinates"@en, "Coördinaten"@nl ;
+    rdfs:comment "RD (Rijksdriehoekscoördinaten) coordinates" ;
+    rdfs:range xsd:string .
+
+# Properties - Kadaster (Land Registry)
+
+geo:owner a rdf:Property ;
+    rdfs:label "Owner"@en, "Eigenaar"@nl ;
+    rdfs:domain geo:Property ;
+    rdfs:range xsd:string .
+
+geo:surfaceArea a rdf:Property ;
+    rdfs:label "Surface Area"@en, "Oppervlakte"@nl ;
+    rdfs:range xsd:decimal .
+
+geo:landUse a rdf:Property ;
+    rdfs:label "Land Use"@en, "Grondgebruik"@nl ;
+    rdfs:range xsd:string .
+
+geo:buildingType a rdf:Property ;
+    rdfs:label "Building Type"@en, "Gebouwtype"@nl ;
+    rdfs:domain geo:Building ;
+    rdfs:range xsd:string .
+
+geo:constructionYear a rdf:Property ;
+    rdfs:label "Construction Year"@en, "Bouwjaar"@nl ;
+    rdfs:range xsd:integer .
+
+# Properties - CBS (Statistics Netherlands)
+
+geo:population a rdf:Property ;
+    rdfs:label "Population"@en, "Bevolking"@nl ;
+    rdfs:range xsd:integer .
+
+geo:households a rdf:Property ;
+    rdfs:label "Households"@en, "Huishoudens"@nl ;
+    rdfs:range xsd:integer .
+
+geo:averageIncome a rdf:Property ;
+    rdfs:label "Average Income"@en, "Gemiddeld Inkomen"@nl ;
+    rdfs:range xsd:decimal .
+
+geo:populationDensity a rdf:Property ;
+    rdfs:label "Population Density"@en, "Bevolkingsdichtheid"@nl ;
+    rdfs:comment "Persons per square kilometer" ;
+    rdfs:range xsd:decimal .
+
+geo:unemploymentRate a rdf:Property ;
+    rdfs:label "Unemployment Rate"@en, "Werkloosheidspercentage"@nl ;
+    rdfs:range xsd:decimal .
+
+# Properties - Rijkswaterstaat (Infrastructure & Water)
+
+geo:waterType a rdf:Property ;
+    rdfs:label "Water Type"@en, "Watertype"@nl ;
+    rdfs:domain geo:WaterBody ;
+    rdfs:range xsd:string .
+
+geo:waterLevel a rdf:Property ;
+    rdfs:label "Water Level"@en, "Waterpeil"@nl ;
+    rdfs:domain geo:WaterBody ;
+    rdfs:range xsd:decimal .
+
+geo:roadType a rdf:Property ;
+    rdfs:label "Road Type"@en, "Wegtype"@nl ;
+    rdfs:domain geo:Road ;
+    rdfs:range xsd:string .
+
+geo:roadNumber a rdf:Property ;
+    rdfs:label "Road Number"@en, "Wegnummer"@nl ;
+    rdfs:domain geo:Road ;
+    rdfs:range xsd:string .
+
+geo:maxSpeed a rdf:Property ;
+    rdfs:label "Maximum Speed"@en, "Maximum Snelheid"@nl ;
+    rdfs:domain geo:Road ;
+    rdfs:range xsd:integer .
+
+geo:infrastructureType a rdf:Property ;
+    rdfs:label "Infrastructure Type"@en, "Infrastructuurtype"@nl ;
+    rdfs:domain geo:Infrastructure ;
+    rdfs:range xsd:string .
+
+geo:managedBy a rdf:Property ;
+    rdfs:label "Managed By"@en, "Beheerd Door"@nl ;
+    rdfs:range xsd:string .
+
+geo:condition a rdf:Property ;
+    rdfs:label "Condition"@en, "Conditie"@nl ;
+    rdfs:comment "Condition assessment (good, fair, poor)" ;
+    rdfs:range xsd:string .
+
+# Relationships
+
+geo:locatedIn a rdf:Property ;
+    rdfs:label "Located In"@en, "Gelegen In"@nl ;
+    rdfs:comment "Relates an entity to its containing geographic area" .
+
+geo:adjacentTo a rdf:Property ;
+    rdfs:label "Adjacent To"@en, "Grenst Aan"@nl ;
+    rdfs:comment "Relates entities that share a boundary" .
+
+geo:crosses a rdf:Property ;
+    rdfs:label "Crosses"@en, "Kruist"@nl ;
+    rdfs:comment "Relates infrastructure that crosses a location or water body" .
+
+geo:serves a rdf:Property ;
+    rdfs:label "Serves"@en, "Bedient"@nl ;
+    rdfs:comment "Relates infrastructure to areas it serves" .

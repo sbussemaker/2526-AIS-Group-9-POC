@@ -31,27 +31,38 @@ docker_client = docker.from_env()
 
 # Service definitions
 SERVICES = {
-    "customer-service": {
-        "name": "customer-service",
-        "display_name": "Customer Service",
-        "description": "Manages customer data",
-        "image": "eai-customer-service",
-        "build_path": "../mcp-servers/customer-service",
-        "container_name": "eai-customer-service",
+    "kadaster-service": {
+        "name": "kadaster-service",
+        "display_name": "Kadaster",
+        "description": "Dutch Land Registry - Cadastral data",
+        "image": "eai-kadaster-service",
+        "build_path": "../mcp-servers/kadaster-service",
+        "container_name": "eai-kadaster-service",
         "status": "stopped",
-        "rdf_entities": ["Customer"],
+        "rdf_entities": ["Property", "Location"],
         "position": {"x": 100, "y": 100}
     },
-    "order-service": {
-        "name": "order-service",
-        "display_name": "Order Service",
-        "description": "Manages order data",
-        "image": "eai-order-service",
-        "build_path": "../mcp-servers/order-service",
-        "container_name": "eai-order-service",
+    "cbs-service": {
+        "name": "cbs-service",
+        "display_name": "CBS",
+        "description": "Statistics Netherlands - Demographics",
+        "image": "eai-cbs-service",
+        "build_path": "../mcp-servers/cbs-service",
+        "container_name": "eai-cbs-service",
         "status": "stopped",
-        "rdf_entities": ["Order"],
-        "position": {"x": 400, "y": 100}
+        "rdf_entities": ["Municipality", "Statistics"],
+        "position": {"x": 350, "y": 100}
+    },
+    "rijkswaterstaat-service": {
+        "name": "rijkswaterstaat-service",
+        "display_name": "Rijkswaterstaat",
+        "description": "Infrastructure & Water Management",
+        "image": "eai-rijkswaterstaat-service",
+        "build_path": "../mcp-servers/rijkswaterstaat-service",
+        "container_name": "eai-rijkswaterstaat-service",
+        "status": "stopped",
+        "rdf_entities": ["Infrastructure", "WaterBody", "Road"],
+        "position": {"x": 600, "y": 100}
     }
 }
 
@@ -277,7 +288,7 @@ def query_services():
 def get_ontology():
     """Get the RDF ontology"""
     try:
-        with open('../ontology/ecommerce.ttl', 'r') as f:
+        with open('../ontology/geospatial.ttl', 'r') as f:
             ontology = f.read()
         return jsonify({"ontology": ontology})
     except Exception as e:

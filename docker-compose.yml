@@ -1,16 +1,21 @@
-version: '3.8'
-
 services:
-  customer-service:
-    build: ./mcp-servers/customer-service
-    container_name: eai-customer-service
+  kadaster-service:
+    build: ./mcp-servers/kadaster-service
+    container_name: eai-kadaster-service
     stdin_open: true
     tty: false
     restart: unless-stopped
 
-  order-service:
-    build: ./mcp-servers/order-service
-    container_name: eai-order-service
+  cbs-service:
+    build: ./mcp-servers/cbs-service
+    container_name: eai-cbs-service
+    stdin_open: true
+    tty: false
+    restart: unless-stopped
+
+  rijkswaterstaat-service:
+    build: ./mcp-servers/rijkswaterstaat-service
+    container_name: eai-rijkswaterstaat-service
     stdin_open: true
     tty: false
     restart: unless-stopped
@@ -26,8 +31,9 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./ontology:/app/ontology
     depends_on:
-      - customer-service
-      - order-service
+      - kadaster-service
+      - cbs-service
+      - rijkswaterstaat-service
     restart: unless-stopped
 
   dashboard:

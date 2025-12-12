@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EAI MCP Dashboard - ArchiMate View</title>
+    <title>Dutch Geospatial Data Integration - ArchiMate View</title>
     <style>
         * {
             margin: 0;
@@ -307,8 +307,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>🏗️ Enterprise Architecture Integration Dashboard</h1>
-            <p class="subtitle">ArchiMate Application Cooperation View | MCP + RDF E-Commerce Integration</p>
+            <h1>🇳🇱 Dutch Geospatial Data Integration</h1>
+            <p class="subtitle">ArchiMate Application Cooperation View | MCP + RDF | Kadaster · CBS · Rijkswaterstaat</p>
         </header>
         
         <div class="main-content">
@@ -327,7 +327,7 @@
                         <select id="tool-select">
                             <option value="">Select a tool...</option>
                         </select>
-                        <input type="text" id="args-input" placeholder='Arguments (JSON): {"customer_id": "CUST001"}'>
+                        <input type="text" id="args-input" placeholder='Arguments (JSON): {"location_id": "LOC001"}'>
                         <button class="btn-query" onclick="executeQuery()">Execute Query</button>
                     </div>
                     <div id="results" class="results"></div>
@@ -354,9 +354,9 @@
                 <div class="panel">
                     <div class="panel-title">📖 RDF Ontology</div>
                     <div style="font-size: 11px; color: #4a5568;">
-                        <strong>Namespace:</strong> http://example.org/ecommerce#<br><br>
-                        <strong>Classes:</strong> Customer, Order, Product, OrderItem<br><br>
-                        <strong>Properties:</strong> customerId, customerName, orderDate, orderTotal, placedBy, etc.
+                        <strong>Namespace:</strong> http://example.org/geospatial#<br><br>
+                        <strong>Classes:</strong> Location, Property, Municipality, Building, WaterBody, Road, Infrastructure<br><br>
+                        <strong>Properties:</strong> locationId, cadastralId, address, population, waterLevel, roadType, etc.
                     </div>
                 </div>
             </div>
@@ -367,14 +367,19 @@
         const API_BASE = 'http://localhost:5000/api';
         let services = [];
         let serviceTools = {
-            'customer-service': [
-                {name: 'list_customers', args: {}},
-                {name: 'get_customer', args: {customer_id: 'CUST001'}}
+            'kadaster-service': [
+                {name: 'list_properties', args: {}},
+                {name: 'get_property', args: {location_id: 'LOC001'}}
             ],
-            'order-service': [
-                {name: 'list_orders', args: {}},
-                {name: 'get_order', args: {order_id: 'ORD001'}},
-                {name: 'get_customer_orders', args: {customer_id: 'CUST001'}}
+            'cbs-service': [
+                {name: 'list_locations', args: {}},
+                {name: 'get_statistics', args: {location_id: 'LOC001'}},
+                {name: 'get_demographics', args: {location_id: 'LOC001'}}
+            ],
+            'rijkswaterstaat-service': [
+                {name: 'list_roads', args: {}},
+                {name: 'get_infrastructure', args: {location_id: 'LOC001'}},
+                {name: 'get_water_level', args: {location_id: 'LOC001'}}
             ]
         };
         
@@ -426,37 +431,41 @@
         function drawConnections() {
             // Remove existing connections
             document.querySelectorAll('.connection-line').forEach(line => line.remove());
-            
+
             const container = document.getElementById('services');
             const boxes = document.querySelectorAll('.service-box');
-            
+
             if (boxes.length >= 2) {
-                const box1 = boxes[0].getBoundingClientRect();
-                const box2 = boxes[1].getBoundingClientRect();
                 const containerRect = container.getBoundingClientRect();
-                
-                const x1 = box1.right - containerRect.left;
-                const y1 = box1.top + box1.height / 2 - containerRect.top;
-                const x2 = box2.left - containerRect.left;
-                const y2 = box2.top + box2.height / 2 - containerRect.top;
-                
-                const line = document.createElement('div');
-                line.className = 'connection-line';
-                
                 const running = services.every(s => s.status === 'running');
-                if (running) {
-                    line.classList.add('active');
+
+                // Draw connections between consecutive services
+                for (let i = 0; i < boxes.length - 1; i++) {
+                    const box1 = boxes[i].getBoundingClientRect();
+                    const box2 = boxes[i + 1].getBoundingClientRect();
+
+                    const x1 = box1.right - containerRect.left;
+                    const y1 = box1.top + box1.height / 2 - containerRect.top;
+                    const x2 = box2.left - containerRect.left;
+                    const y2 = box2.top + box2.height / 2 - containerRect.top;
+
+                    const line = document.createElement('div');
+                    line.className = 'connection-line';
+
+                    if (running) {
+                        line.classList.add('active');
+                    }
+
+                    const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+                    const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+
+                    line.style.width = `${length}px`;
+                    line.style.left = `${x1}px`;
+                    line.style.top = `${y1}px`;
+                    line.style.transform = `rotate(${angle}deg)`;
+
+                    container.appendChild(line);
                 }
-                
-                const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-                const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
-                
-                line.style.width = `${length}px`;
-                line.style.left = `${x1}px`;
-                line.style.top = `${y1}px`;
-                line.style.transform = `rotate(${angle}deg)`;
-                
-                container.appendChild(line);
             }
         }
         

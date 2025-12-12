@@ -204,14 +204,15 @@ for service in SERVICES.values():
 **Manual Rebuild:**
 To force rebuild without starting orchestrator:
 ```bash
-docker build --no-cache -t eai-customer-service mcp-servers/customer-service/
-docker build --no-cache -t eai-order-service mcp-servers/order-service/
+docker build --no-cache -t eai-kadaster-service mcp-servers/kadaster-service/
+docker build --no-cache -t eai-cbs-service mcp-servers/cbs-service/
+docker build --no-cache -t eai-rijkswaterstaat-service mcp-servers/rijkswaterstaat-service/
 ```
 
 **Restart Containers:**
 After rebuilding, restart the containers:
 ```bash
-docker restart eai-customer-service eai-order-service
+docker restart eai-kadaster-service eai-cbs-service eai-rijkswaterstaat-service
 ```
 
 ---
@@ -273,14 +274,17 @@ This helps identify:
 View logs from MCP server containers:
 
 ```bash
-# Customer service
-docker logs eai-customer-service
+# Kadaster service
+docker logs eai-kadaster-service
 
-# Order service
-docker logs eai-order-service
+# CBS service
+docker logs eai-cbs-service
+
+# Rijkswaterstaat service
+docker logs eai-rijkswaterstaat-service
 
 # Follow logs in real-time
-docker logs -f eai-customer-service
+docker logs -f eai-kadaster-service
 ```
 
 ---
@@ -291,7 +295,7 @@ Test MCP servers without the orchestrator:
 
 ```bash
 # Start container interactively
-docker run -it --rm eai-customer-service python -u server.py
+docker run -it --rm eai-kadaster-service python -u server.py
 
 # Send JSON-RPC request (paste and press Enter)
 {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}}
@@ -301,7 +305,7 @@ docker run -it --rm eai-customer-service python -u server.py
 {"jsonrpc": "2.0", "id": 2, "method": "tools/list", "params": {}}
 
 # Then call a tool
-{"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "list_customers", "arguments": {}}}
+{"jsonrpc": "2.0", "id": 3, "method": "tools/call", "params": {"name": "list_properties", "arguments": {}}}
 ```
 
 ---
