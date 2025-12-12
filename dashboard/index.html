@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EAI MCP Dashboard - ArchiMate View</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        
+        .archimate-view {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-height: 500px;
+        }
+        
+        .view-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .services-container {
+            position: relative;
+            min-height: 400px;
+        }
+        
+        /* ArchiMate Application Service styling */
+        .service-box {
+            position: absolute;
+            width: 200px;
+            border: 2px solid #4a5568;
+            border-radius: 8px;
+            background: #e8f4f8;
+            padding: 15px;
+            cursor: move;
+            transition: all 0.3s ease;
+        }
+        
+        .service-box:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .service-box.running {
+            background: #c6f6d5;
+            border-color: #38a169;
+        }
+        
+        .service-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .service-icon {
+            width: 30px;
+            height: 30px;
+            background: #4a5568;
+            border-radius: 6px;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .service-box.running .service-icon {
+            background: #38a169;
+        }
+        
+        .service-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 14px;
+        }
+        
+        .service-description {
+            font-size: 12px;
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+        
+        .service-entities {
+            font-size: 11px;
+            color: #718096;
+            margin-bottom: 10px;
+            padding: 5px;
+            background: white;
+            border-radius: 4px;
+        }
+        
+        .service-status {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        
+        .service-status.running {
+            background: #38a169;
+            color: white;
+        }
+        
+        .service-status.stopped {
+            background: #e53e3e;
+            color: white;
+        }
+        
+        .service-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+            flex: 1;
+        }
+        
+        .btn:hover {
+            opacity: 0.8;
+        }
+        
+        .btn-start {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-stop {
+            background: #f56565;
+            color: white;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Data flow connections */
+        .connection-line {
+            position: absolute;
+            height: 2px;
+            background: #4a5568;
+            transform-origin: left center;
+            pointer-events: none;
+        }
+        
+        .connection-line.active {
+            background: #38a169;
+            box-shadow: 0 0 8px #38a169;
+        }
+        
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .panel {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .query-builder {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        select, input {
+            padding: 8px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+        
+        .btn-query {
+            background: #667eea;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .btn-query:hover {
+            background: #5568d3;
+        }
+        
+        .results {
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .result-item {
+            background: #f7fafc;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+        
+        .result-item pre {
+            margin-top: 5px;
+            background: white;
+            padding: 8px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 11px;
+        }
+        
+        .legend {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 12px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .legend-box {
+            width: 30px;
+            height: 20px;
+            border: 2px solid #4a5568;
+            border-radius: 4px;
+        }
+        
+        .legend-box.running {
+            background: #c6f6d5;
+            border-color: #38a169;
+        }
+        
+        .legend-box.stopped {
+            background: #e8f4f8;
+            border-color: #4a5568;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏗️ Enterprise Architecture Integration Dashboard</h1>
+            <p class="subtitle">ArchiMate Application Cooperation View | MCP + RDF E-Commerce Integration</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="archimate-view">
+                <div class="view-title">Application Cooperation Viewpoint</div>
+                <div id="services" class="services-container"></div>
+            </div>
+            
+            <div class="side-panel">
+                <div class="panel">
+                    <div class="panel-title">🔍 Query Services (MCP Client)</div>
+                    <div class="query-builder">
+                        <select id="service-select">
+                            <option value="">Select a service...</option>
+                        </select>
+                        <select id="tool-select">
+                            <option value="">Select a tool...</option>
+                        </select>
+                        <input type="text" id="args-input" placeholder='Arguments (JSON): {"customer_id": "CUST001"}'>
+                        <button class="btn-query" onclick="executeQuery()">Execute Query</button>
+                    </div>
+                    <div id="results" class="results"></div>
+                </div>
+                
+                <div class="panel">
+                    <div class="panel-title">📋 Legend</div>
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-box running"></div>
+                            <span>Application Service (Running)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-box stopped"></div>
+                            <span>Application Service (Stopped)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div style="width: 30px; height: 2px; background: #38a169;"></div>
+                            <span>Data Flow (RDF/JSON-LD)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <div class="panel-title">📖 RDF Ontology</div>
+                    <div style="font-size: 11px; color: #4a5568;">
+                        <strong>Namespace:</strong> http://example.org/ecommerce#<br><br>
+                        <strong>Classes:</strong> Customer, Order, Product, OrderItem<br><br>
+                        <strong>Properties:</strong> customerId, customerName, orderDate, orderTotal, placedBy, etc.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+        let services = [];
+        let serviceTools = {
+            'customer-service': [
+                {name: 'list_customers', args: {}},
+                {name: 'get_customer', args: {customer_id: 'CUST001'}}
+            ],
+            'order-service': [
+                {name: 'list_orders', args: {}},
+                {name: 'get_order', args: {order_id: 'ORD001'}},
+                {name: 'get_customer_orders', args: {customer_id: 'CUST001'}}
+            ]
+        };
+        
+        async function loadServices() {
+            try {
+                const response = await fetch(`${API_BASE}/services`);
+                services = await response.json();
+                renderServices();
+                updateServiceSelect();
+            } catch (error) {
+                console.error('Error loading services:', error);
+            }
+        }
+        
+        function renderServices() {
+            const container = document.getElementById('services');
+            container.innerHTML = '';
+            
+            services.forEach(service => {
+                const box = document.createElement('div');
+                box.className = `service-box ${service.status === 'running' ? 'running' : ''}`;
+                box.style.left = `${service.position.x}px`;
+                box.style.top = `${service.position.y}px`;
+                
+                const entities = service.rdf_entities.join(', ');
+                
+                box.innerHTML = `
+                    <div class="service-header">
+                        <div class="service-icon">${service.display_name[0]}</div>
+                        <div class="service-name">${service.display_name}</div>
+                    </div>
+                    <div class="service-description">${service.description}</div>
+                    <div class="service-entities">RDF: ${entities}</div>
+                    <div class="service-status ${service.status}">${service.status}</div>
+                    <div class="service-controls">
+                        <button class="btn btn-start" onclick="startService('${service.name}')" 
+                                ${service.status === 'running' ? 'disabled' : ''}>Start</button>
+                        <button class="btn btn-stop" onclick="stopService('${service.name}')"
+                                ${service.status !== 'running' ? 'disabled' : ''}>Stop</button>
+                    </div>
+                `;
+                
+                container.appendChild(box);
+            });
+            
+            drawConnections();
+        }
+        
+        function drawConnections() {
+            // Remove existing connections
+            document.querySelectorAll('.connection-line').forEach(line => line.remove());
+            
+            const container = document.getElementById('services');
+            const boxes = document.querySelectorAll('.service-box');
+            
+            if (boxes.length >= 2) {
+                const box1 = boxes[0].getBoundingClientRect();
+                const box2 = boxes[1].getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+                
+                const x1 = box1.right - containerRect.left;
+                const y1 = box1.top + box1.height / 2 - containerRect.top;
+                const x2 = box2.left - containerRect.left;
+                const y2 = box2.top + box2.height / 2 - containerRect.top;
+                
+                const line = document.createElement('div');
+                line.className = 'connection-line';
+                
+                const running = services.every(s => s.status === 'running');
+                if (running) {
+                    line.classList.add('active');
+                }
+                
+                const length = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+                const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+                
+                line.style.width = `${length}px`;
+                line.style.left = `${x1}px`;
+                line.style.top = `${y1}px`;
+                line.style.transform = `rotate(${angle}deg)`;
+                
+                container.appendChild(line);
+            }
+        }
+        
+        async function startService(serviceName) {
+            try {
+                const response = await fetch(`${API_BASE}/services/${serviceName}/start`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                console.log('Start result:', result);
+                setTimeout(loadServices, 1500);
+            } catch (error) {
+                console.error('Error starting service:', error);
+            }
+        }
+        
+        async function stopService(serviceName) {
+            try {
+                const response = await fetch(`${API_BASE}/services/${serviceName}/stop`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                console.log('Stop result:', result);
+                setTimeout(loadServices, 1000);
+            } catch (error) {
+                console.error('Error stopping service:', error);
+            }
+        }
+        
+        function updateServiceSelect() {
+            const select = document.getElementById('service-select');
+            const toolSelect = document.getElementById('tool-select');
+            const currentValue = select.value; // Preserve current selection
+            const currentTool = toolSelect.value; // Preserve tool selection
+
+            select.innerHTML = '<option value="">Select a service...</option>';
+            services.forEach(service => {
+                const option = document.createElement('option');
+                option.value = service.name;
+                option.textContent = service.display_name;
+                select.appendChild(option);
+            });
+            select.value = currentValue; // Restore selection
+
+            // Repopulate tools if a service was selected
+            if (currentValue && serviceTools[currentValue]) {
+                toolSelect.innerHTML = '<option value="">Select a tool...</option>';
+                serviceTools[currentValue].forEach(tool => {
+                    const option = document.createElement('option');
+                    option.value = tool.name;
+                    option.textContent = tool.name;
+                    option.dataset.args = JSON.stringify(tool.args);
+                    toolSelect.appendChild(option);
+                });
+                toolSelect.value = currentTool; // Restore tool selection
+            }
+        }
+        
+        document.getElementById('service-select').addEventListener('change', (e) => {
+            const serviceName = e.target.value;
+            const toolSelect = document.getElementById('tool-select');
+            toolSelect.innerHTML = '<option value="">Select a tool...</option>';
+            
+            if (serviceName && serviceTools[serviceName]) {
+                serviceTools[serviceName].forEach(tool => {
+                    const option = document.createElement('option');
+                    option.value = tool.name;
+                    option.textContent = tool.name;
+                    option.dataset.args = JSON.stringify(tool.args);
+                    toolSelect.appendChild(option);
+                });
+            }
+        });
+        
+        document.getElementById('tool-select').addEventListener('change', (e) => {
+            const selected = e.target.selectedOptions[0];
+            if (selected && selected.dataset.args) {
+                document.getElementById('args-input').value = selected.dataset.args;
+            }
+        });
+        
+        async function executeQuery() {
+            const service = document.getElementById('service-select').value;
+            const tool = document.getElementById('tool-select').value;
+            const argsText = document.getElementById('args-input').value;
+            
+            if (!service || !tool) {
+                alert('Please select a service and tool');
+                return;
+            }
+            
+            let args = {};
+            try {
+                if (argsText.trim()) {
+                    args = JSON.parse(argsText);
+                }
+            } catch (e) {
+                alert('Invalid JSON arguments');
+                return;
+            }
+            
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<div style="color: #666;">Executing query...</div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/query`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        queries: [{service, tool, arguments: args}]
+                    })
+                });
+                
+                const data = await response.json();
+                displayResults(data.results);
+            } catch (error) {
+                resultsDiv.innerHTML = `<div style="color: red;">Error: ${error.message}</div>`;
+            }
+        }
+        
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            
+            results.forEach((result, index) => {
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                
+                let content = '';
+                if (result.result && result.result.result && result.result.result.content) {
+                    const textContent = result.result.result.content[0].text;
+                    content = `<pre>${textContent}</pre>`;
+                } else if (result.error) {
+                    content = `<div style="color: red;">Error: ${result.error}</div>`;
+                } else {
+                    content = `<pre>${JSON.stringify(result.result, null, 2)}</pre>`;
+                }
+                
+                item.innerHTML = `
+                    <strong>${result.service} → ${result.tool}</strong>
+                    ${content}
+                `;
+                
+                resultsDiv.appendChild(item);
+            });
+        }
+        
+        // Initialize
+        loadServices();
+        setInterval(loadServices, 5000);
+        
+        // Redraw connections on window resize
+        window.addEventListener('resize', drawConnections);
+    </script>
+</body>
+</html>
