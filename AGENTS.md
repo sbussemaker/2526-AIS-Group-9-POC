@@ -100,6 +100,11 @@ AZURE_OPENAI_API_VERSION=2024-12-01-preview
 
 ## Code Conventions
 
+### Git Commits
+
+- Do not add "Co-Authored-By: Claude" or similar AI attribution lines to commits
+- Write clear, concise commit messages describing what changed and why
+
 ### Python Style
 
 - Follow PEP 8 conventions
