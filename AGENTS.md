@@ -196,6 +196,29 @@ The agent service is a **Meta-Agent** - both an MCP server and MCP client:
 
 ## Testing
 
+### MCP Inspector
+
+Use the MCP Inspector for interactive debugging of MCP servers:
+
+```bash
+# Inspect kadaster-service locally
+./scripts/inspect-mcp.sh kadaster-service
+
+# Inspect cbs-service locally
+./scripts/inspect-mcp.sh cbs-service
+
+# Inspect via Docker (container must be running)
+./scripts/inspect-mcp.sh kadaster-service --docker
+
+# Inspect agent-service (requires .env with Azure credentials)
+./scripts/inspect-mcp.sh agent-service
+```
+
+The Inspector opens a web UI where you can:
+- Browse available tools and their schemas
+- Execute tools with custom arguments
+- View server logs and notifications
+
 ### Manual Testing
 
 ```bash
