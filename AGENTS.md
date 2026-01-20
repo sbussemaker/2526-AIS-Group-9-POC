@@ -6,7 +6,10 @@ Guidance for working on the Dutch Geospatial Data Integration project.
 
 This is a Model Context Protocol (MCP) demonstration project showcasing Enterprise Architecture Integration using Dutch government data sources. The system consists of:
 
-- **Three MCP server services** (Kadaster, CBS, Rijkswaterstaat) providing geospatial data via RDF/JSON-LD
+- **Five MCP server services** from three organizations providing geospatial data via RDF/JSON-LD:
+  - **Kadaster**: BAG (addresses/buildings), BGT (large-scale topography), BRT (topographic maps)
+  - **CBS**: Demographics and statistics
+  - **Rijkswaterstaat**: Infrastructure and water management
 - **AI Agent service** powered by Azure OpenAI for natural language querying
 - **Flask orchestrator** (MCP client) coordinating service communication
 - **HTML dashboard** for visualization and interaction
@@ -16,28 +19,29 @@ All MCP servers communicate via stdio using JSON-RPC 2.0 protocol and run in iso
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    User / Dashboard                      │
-└────────────────────────┬────────────────────────────────┘
-                         │ HTTP
-                         ↓
-               ┌──────────────────┐
-               │   Orchestrator   │  Flask (port 5000)
-               │   (MCP Client)   │
-               └────────┬─────────┘
-                        │ MCP Protocol (stdio)
-       ┌────────────────┼────────────────┐
-       ↓                ↓                ↓
-  ┌─────────┐     ┌─────────┐     ┌──────────────┐
-  │Kadaster │     │   CBS   │     │Rijkswaterstaat│
-  │Property │     │ Stats   │     │Infrastructure│
-  └─────────┘     └─────────┘     └──────────────┘
-                        │
-                        ↓
-              ┌──────────────────┐
-              │   Agent Service  │  ← Also an MCP Server
-              │   (Meta-Agent)   │  ← Queries other services
-              └──────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                         User / Dashboard                             │
+└───────────────────────────────┬─────────────────────────────────────┘
+                                │ HTTP
+                                ↓
+                      ┌──────────────────┐
+                      │   Orchestrator   │  Flask (port 5000)
+                      │   (MCP Client)   │
+                      └────────┬─────────┘
+                               │ MCP Protocol (stdio)
+       ┌───────────┬───────────┼───────────┬───────────┐
+       ↓           ↓           ↓           ↓           ↓
+  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌──────────────┐
+  │   BAG   │ │   BGT   │ │   BRT   │ │   CBS   │ │Rijkswaterstaat│
+  │ Address │ │  Topo   │ │  Maps   │ │ Stats   │ │Infrastructure│
+  └─────────┘ └─────────┘ └─────────┘ └─────────┘ └──────────────┘
+       └───────────┴───────────┘
+              Kadaster                        │
+                                              ↓
+                                  ┌──────────────────┐
+                                  │   Agent Service  │  ← Also an MCP Server
+                                  │   (Meta-Agent)   │  ← Queries other services
+                                  └──────────────────┘
 ```
 
 ### MCP Server Structure
@@ -51,7 +55,7 @@ Each MCP server (`mcp-servers/*/server.py`) follows this pattern:
 
 ### Docker Architecture
 
-**Important**: The three data services (Kadaster, CBS, Rijkswaterstaat) share a single distroless Docker image:
+**Important**: The five data services (BAG, BGT, BRT, CBS, Rijkswaterstaat) share a single distroless Docker image:
 - **Shared Dockerfile**: `mcp-servers/Dockerfile.shared` (multi-stage build)
 - **Base image**: `gcr.io/distroless/python3-debian12` (no shell, minimal attack surface)
 - **Build context**: Each service directory (contains only `server.py`)
@@ -140,11 +144,11 @@ Example tool structure:
 
 ### Docker Guidelines
 
-**DO NOT** create individual Dockerfiles for Kadaster, CBS, or Rijkswaterstaat services. They share `Dockerfile.shared`.
+**DO NOT** create individual Dockerfiles for BAG, BGT, BRT, CBS, or Rijkswaterstaat services. They share `Dockerfile.shared`.
 
 When modifying the shared Dockerfile:
-- Changes affect all three services
-- Test all three containers after modifications
+- Changes affect all five services
+- Test all five containers after modifications
 - Keep the distroless approach (no shell utilities)
 
 ### RDF/Ontology Updates
@@ -190,7 +194,9 @@ The agent service is a **Meta-Agent** - both an MCP server and MCP client:
 - `ask_question` tool for natural language queries
 
 **Consumes (as MCP Client):**
-- Kadaster tools: `get_property`, `list_properties`
+- BAG tools: `find_address`, `get_building`, `get_address`, `list_addresses`
+- BGT tools: `find_area`, `get_terrain`, `get_roads`, `get_water`
+- BRT tools: `find_place`, `get_boundaries`, `get_place_names`, `get_landscape`, `list_municipalities`
 - CBS tools: `get_statistics`, `list_locations`, `get_demographics`
 - Rijkswaterstaat tools: `get_infrastructure`, `list_roads`, `get_water_level`
 
@@ -201,14 +207,17 @@ The agent service is a **Meta-Agent** - both an MCP server and MCP client:
 Use the MCP Inspector for interactive debugging of MCP servers:
 
 ```bash
-# Inspect kadaster-service locally
-./scripts/inspect-mcp.sh kadaster-service
+# Inspect Kadaster services locally
+./scripts/inspect-mcp.sh bag-service
+./scripts/inspect-mcp.sh bgt-service
+./scripts/inspect-mcp.sh brt-service
 
-# Inspect cbs-service locally
+# Inspect other services locally
 ./scripts/inspect-mcp.sh cbs-service
+./scripts/inspect-mcp.sh rijkswaterstaat-service
 
 # Inspect via Docker (container must be running)
-./scripts/inspect-mcp.sh kadaster-service --docker
+./scripts/inspect-mcp.sh bag-service --docker
 
 # Inspect agent-service (requires .env with Azure credentials)
 ./scripts/inspect-mcp.sh agent-service
@@ -223,7 +232,7 @@ The Inspector opens a web UI where you can:
 
 ```bash
 # Test individual MCP server locally
-cd mcp-servers/kadaster-service
+cd mcp-servers/bag-service
 echo '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}' | python server.py
 ```
 
@@ -236,20 +245,20 @@ python test_agent.py
 # Test via orchestrator API
 curl -X POST http://localhost:5000/api/query \
   -H "Content-Type: application/json" \
-  -d '{"service":"kadaster-service","tool":"list_properties","arguments":{}}'
+  -d '{"service":"bag-service","tool":"list_addresses","arguments":{}}'
 ```
 
 ### Docker Testing
 
 ```bash
 # Build and start services
-docker-compose up -d kadaster-service cbs-service rijkswaterstaat-service
+docker-compose up -d bag-service bgt-service brt-service cbs-service rijkswaterstaat-service
 
 # Check logs
-docker logs eai-kadaster-service
+docker logs eai-bag-service
 
 # Verify distroless (should fail - no shell)
-docker exec eai-kadaster-service ls
+docker exec eai-bag-service ls
 ```
 
 ## Debugging
@@ -291,7 +300,7 @@ Common causes:
 
 ```bash
 # Rebuild specific service
-docker-compose build kadaster-service
+docker-compose build bag-service
 
 # View all service logs
 docker-compose logs -f
