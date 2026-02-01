@@ -154,7 +154,7 @@ When modifying the shared Dockerfile:
 ### RDF/Ontology Updates
 
 When modifying the shared ontology (`ontology/geospatial.ttl`):
-1. Use consistent namespace: `http://example.org/geospatial#`
+1. Use consistent namespace: `http://imx-geo-prime.org/geospatial#`
 2. Update all affected MCP servers to use new properties
 3. Maintain backward compatibility with existing data
 
